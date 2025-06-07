@@ -1,35 +1,158 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useOptimistic, useState, useTransition } from 'react';
+import styled from 'styled-components';
+import { Layout } from 'antd';
+import { Board } from './components/Board';
+import type { Board as BoardType, List, Task } from './types';
+
+const { Header, Content } = Layout;
+
+const StyledHeader = styled(Header)`
+  background: #1d2125;
+  padding: 0 24px;
+  line-height: 64px;
+  display: flex;
+  align-items: center;
+`;
+
+const AppTitle = styled.h1`
+  color: white;
+  margin: 0;
+  font-size: 20px;
+`;
+
+const StyledContent = styled(Content)`
+  height: calc(100vh - 64px);
+`;
+
+const STORAGE_KEY = 'task-management-data';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [board, setBoard] = useState<BoardType>(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    return savedData ? JSON.parse(savedData) : { lists: [] };
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+  }, [board]);
+
+  const [optimisticBoard, addOptimisticUpdate] = useOptimistic(
+    board,
+    (current: BoardType, updater: (prev: BoardType) => BoardType) => updater(current)
+  );
+
+  const [isPending, startTransition] = useTransition();
+
+  const handleAddList = (title: string) => {
+    const newList: List = {
+      id: crypto.randomUUID(),
+      title,
+      tasks: [],
+    };
+
+    startTransition(() => {
+      addOptimisticUpdate((prev) => ({
+        ...prev,
+        lists: [...prev.lists, newList],
+      }));
+
+      setBoard((prev) => ({
+        ...prev,
+        lists: [...prev.lists, newList],
+      }));
+    });
+  };
+
+  const handleAddTask = (listId: string, task: Task) => {
+    startTransition(() => {
+      addOptimisticUpdate((prev) => ({
+        ...prev,
+        lists: prev.lists.map((list) =>
+          list.id === listId
+            ? { ...list, tasks: [...list.tasks, task] }
+            : list
+        ),
+      }));
+
+      setBoard((prev) => ({
+        ...prev,
+        lists: prev.lists.map((list) =>
+          list.id === listId
+            ? { ...list, tasks: [...list.tasks, task] }
+            : list
+        ),
+      }));
+    });
+  };
+
+  const handleMoveTask = (taskId: string, sourceListId: string, targetListId: string) => {
+    startTransition(() => {
+      const sourceList = board.lists.find((l) => l.id === sourceListId);
+      const task = sourceList?.tasks.find((t) => t.id === taskId);
+      if (!sourceList || !task) return;
+
+      addOptimisticUpdate((prev) => ({
+        ...prev,
+        lists: prev.lists.map((list) => {
+          if (list.id === sourceListId) {
+            return {
+              ...list,
+              tasks: list.tasks.filter((t) => t.id !== taskId),
+            };
+          }
+          if (list.id === targetListId) {
+            return {
+              ...list,
+              tasks: [...list.tasks, task],
+            };
+          }
+          return list;
+        }),
+      }));
+
+      setBoard((prev) => {
+        const sourceList = prev.lists.find((l) => l.id === sourceListId);
+        const task = sourceList?.tasks.find((t) => t.id === taskId);
+        if (!sourceList || !task) return prev;
+
+        return {
+          ...prev,
+          lists: prev.lists.map((list) => {
+            if (list.id === sourceListId) {
+              return {
+                ...list,
+                tasks: list.tasks.filter((t) => t.id !== taskId),
+              };
+            }
+            if (list.id === targetListId) {
+              return {
+                ...list,
+                tasks: [...list.tasks, task],
+              };
+            }
+            return list;
+          }),
+        };
+      });
+    });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Layout style={{ minHeight: '100vh' }}>
+      <StyledHeader>
+        <AppTitle>Task Management</AppTitle>
+      </StyledHeader>
+      <StyledContent>
+        <Board
+          isPending={isPending}
+          board={optimisticBoard}
+          onAddList={handleAddList}
+          onAddTask={handleAddTask}
+          onMoveTask={handleMoveTask}
+        />
+      </StyledContent>
+    </Layout>
+  );
 }
 
-export default App
+export default App;
