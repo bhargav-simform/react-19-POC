@@ -1,54 +1,150 @@
-# React + TypeScript + Vite
+# React 19 Task Management Board
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern task management application built with React 19, demonstrating the latest features and best practices.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Task Board Management
+- Create and manage multiple lists
+- Add tasks to lists
+- Drag and drop tasks between lists
+- Optimistic UI updates for instant feedback
+- Persistent storage using localStorage
 
-## Expanding the ESLint configuration
+### 2. Real-time UI Feedback
+- Loading states during async operations
+- Optimistic updates for immediate user feedback
+- Error handling with user-friendly messages
+- Smooth transitions and animations
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. Modern UI Components
+- Responsive layout with styled-components
+- Ant Design integration for UI components
+- Custom styled cards and containers
+- Drag and drop interface
+- Loading spinners and progress indicators
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## React 19 Features Implemented
+
+### 1. `useOptimistic`
+Used for optimistic updates in multiple places:
+- Adding new tasks (List.tsx)
+- Adding new lists (Board.tsx)
+- Moving tasks between lists
+- Updating task counts
+
+Example:
+```typescript
+const [optimisticTasks, addOptimisticTask] = useOptimistic(
+  list.tasks,
+  (currentTasks: TaskType[], newTask: TaskType) => [...currentTasks, newTask]
+);
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. `useActionState`
+Implemented for form handling and async operations:
+- Task creation form
+- List creation form
+- Error state management
+- Loading state management
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Example:
+```typescript
+const [formState, submitAction] = useActionState<
+  { error: string | null },
+  { title: string }
+>(async (_prevState, formData) => {
+  // ... async logic
+});
 ```
+
+### 3. `useTransition`
+Used for managing pending states during:
+- Task addition
+- List creation
+- Task movement between lists
+
+Example:
+```typescript
+const [isPending, startTransition] = useTransition();
+
+startTransition(() => {
+  submitAction({ title: newTaskTitle });
+});
+```
+
+### 4. Async Actions
+Proper handling of async operations with simulated API delays:
+- Task creation (1000ms delay)
+- List creation (1000ms delay)
+- Optimistic updates during async operations
+
+## Architecture Highlights
+
+### 1. Type Safety
+- Full TypeScript implementation
+- Strict type checking
+- Interface definitions for all components
+
+### 2. Component Structure
+- Modular component design
+- Clear separation of concerns
+- Reusable styled components
+
+### 3. State Management
+- React 19's built-in state management
+- Optimistic updates for better UX
+- Local storage persistence
+
+### 4. Error Handling
+- Form validation
+- Async operation error handling
+- User feedback for all operations
+
+## Best Practices
+
+1. **React 19 Patterns**
+   - Use of function components
+   - Proper handling of transitions
+   - Optimistic UI updates
+   - Type-safe props and state
+
+2. **Performance**
+   - Optimistic updates for perceived performance
+   - Proper use of useTransition for non-blocking updates
+   - Efficient re-renders
+
+3. **User Experience**
+   - Loading states
+   - Error feedback
+   - Smooth animations
+   - Responsive design
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## Technical Requirements
+
+- Node.js
+- React 19
+- TypeScript
+- Vite
+- Ant Design v5
+- Styled Components
+- React DnD
+
+## Browser Support
+
+- Modern browsers (Chrome, Firefox, Safari, Edge)
+- ES2020+ features
+- CSS Grid and Flexbox
