@@ -79,6 +79,13 @@ Proper handling of async operations with simulated API delays:
 - List creation (1000ms delay)
 - Optimistic updates during async operations
 
+### 5, Ref as Prop & forwardRef is removed
+We can directly pass ref as prop
+- To access the ref in child component, now no need to use forwardRef 
+
+### 6. useDifferedValue
+we can use initialValue for the same
+
 ## Architecture Highlights
 
 ### 1. Type Safety

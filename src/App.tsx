@@ -4,7 +4,9 @@ import { Layout } from 'antd';
 import { Board } from './components/Board';
 import type { Board as BoardType, List, Task } from './types';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { ParentComponent } from './components/ParentComponent';
+import { ParentComponent } from './examples/ref/ParentComponent';
+import ContactForm from './examples/useFormAction';
+import ChartDemo from './examples/useDifferedHook';
 
 const { Header, Content } = Layout;
 
@@ -143,12 +145,12 @@ function App() {
 
   // Here for context no need to use Provider in Wrapping component
   return (
-  <ThemeContext value='black'>
-      <Layout style={{ minHeight: '100vh' }}>
-        <StyledHeader>
-          <AppTitle>Task Management</AppTitle>
-        </StyledHeader>
-        <BrowserRouter>
+    <ThemeContext value='black'>
+      <BrowserRouter>
+        <Layout style={{ minHeight: '100vh' }}>
+          <StyledHeader>
+            <AppTitle>Task Management</AppTitle>
+          </StyledHeader>
           <Routes>
             <Route path='/' element={
               <StyledContent>
@@ -158,17 +160,19 @@ function App() {
                   onAddList={handleAddList}
                   onAddTask={handleAddTask}
                   onMoveTask={handleMoveTask}
-                  />
+                />
               </StyledContent>
             } />
             <Route path="/ref-demo" element={
               <StyledContent>
                 <ParentComponent />
               </StyledContent>} />
+            <Route element={<ContactForm />} path="/contact" />
+            <Route element={<ChartDemo />} path="/chart" />
           </Routes>
-        </BrowserRouter>
-      </Layout>
-  </ThemeContext>
+        </Layout>
+      </BrowserRouter>
+    </ThemeContext>
   );
 }
 

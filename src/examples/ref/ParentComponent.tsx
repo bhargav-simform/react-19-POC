@@ -10,7 +10,8 @@ export const ParentComponent = () => {
 
   return (
     <div>
-      <RefDemo ref={refDemoRef} />
+      { /*We Can pass Ref ad prop  */ }
+      <RefDemo ref={refDemoRef || null} />
       <button onClick={handleFocus} style={{ marginTop: 8 }}>
         Focus the input in child
       </button>
