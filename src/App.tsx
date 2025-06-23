@@ -1,8 +1,10 @@
-import { useEffect, useOptimistic, useState, useTransition } from 'react';
+import { createContext, useEffect, useOptimistic, useState, useTransition } from 'react';
 import styled from 'styled-components';
 import { Layout } from 'antd';
 import { Board } from './components/Board';
 import type { Board as BoardType, List, Task } from './types';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { ParentComponent } from './components/ParentComponent';
 
 const { Header, Content } = Layout;
 
@@ -27,6 +29,8 @@ const StyledContent = styled(Content)`
 const STORAGE_KEY = 'task-management-data';
 
 function App() {
+  const ThemeContext = createContext('');
+
   const [board, setBoard] = useState<BoardType>(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
     return savedData ? JSON.parse(savedData) : { lists: [] };
@@ -137,21 +141,34 @@ function App() {
     });
   };
 
+  // Here for context no need to use Provider in Wrapping component
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <StyledHeader>
-        <AppTitle>Task Management</AppTitle>
-      </StyledHeader>
-      <StyledContent>
-        <Board
-          isPending={isPending}
-          board={optimisticBoard}
-          onAddList={handleAddList}
-          onAddTask={handleAddTask}
-          onMoveTask={handleMoveTask}
-        />
-      </StyledContent>
-    </Layout>
+  <ThemeContext value='black'>
+      <Layout style={{ minHeight: '100vh' }}>
+        <StyledHeader>
+          <AppTitle>Task Management</AppTitle>
+        </StyledHeader>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={
+              <StyledContent>
+                <Board
+                  isPending={isPending}
+                  board={optimisticBoard}
+                  onAddList={handleAddList}
+                  onAddTask={handleAddTask}
+                  onMoveTask={handleMoveTask}
+                  />
+              </StyledContent>
+            } />
+            <Route path="/ref-demo" element={
+              <StyledContent>
+                <ParentComponent />
+              </StyledContent>} />
+          </Routes>
+        </BrowserRouter>
+      </Layout>
+  </ThemeContext>
   );
 }
 
